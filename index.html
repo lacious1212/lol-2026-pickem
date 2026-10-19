@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2026 LOL 世界賽 瑞士輪模擬預測 (Swiss Stage Pick'em)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- html2canvas for generating export card image -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            hextech: {
+              black: '#080a0e',
+              dark: '#0f141d',
+              card: '#161c28',
+              cardHover: '#1f2737',
+              border: '#303948',
+              gold: '#c8aa6e',
+              goldBright: '#f0e6d2',
+              goldDark: '#785a28',
+              accentBlue: '#0ac8b9',
+              danger: '#e84057'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+    body {
+      font-family: 'Inter', 'Noto Sans TC', sans-serif;
+      background-color: #080a0e;
+      color: #cdbe91;
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f141d;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #303948;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #c8aa6e;
+    }
+    .gold-gradient-text {
+      background: linear-gradient(135deg, #f0e6d2 0%, #c8aa6e 60%, #785a28 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hex-glow {
+      box-shadow: 0 0 15px rgba(200, 170, 110, 0.15);
+    }
+    .hex-glow-win {
+      box-shadow: 0 0 16px rgba(10, 200, 185, 0.3);
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-200 antialiased selection:bg-hextech-gold selection:text-black">
+
+  <!-- Main App Container -->
+  <div class="max-w-7xl mx-auto px-3 sm:px-6 py-4 flex flex-col min-h-screen">
+    
+    <!-- Header -->
+    <header class="flex flex-col md:flex-row items-center justify-between border-b border-hextech-border pb-4 mb-5 gap-4">
+      <div class="flex items-center gap-3.5">
+        <div class="w-11 h-11 rounded-lg bg-gradient-to-br from-hextech-gold to-hextech-goldDark p-0.5 shadow-lg flex items-center justify-center">
+          <div class="w-full h-full bg-hextech-black rounded-[7px] flex items-center justify-center">
+            <i class="fa-solid fa-trophy text-hextech-gold text-xl"></i>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs uppercase tracking-widest px-2 py-0.5 rounded bg-hextech-gold/20 text-hextech-gold font-bold border border-hextech-gold/30">2026 WORLDS</span>
+            <span class="text-xs text-slate-400">瑞士輪預測系統</span>
+          </div>
+          <h1 class="text-xl sm:text-2xl font-black gold-gradient-text tracking-wide mt-0.5">
+            英雄聯盟世界賽 瑞士輪 PICK'EM 模擬器
+          </h1>
+        </div>
+      </div>
+
+      <!-- Quick Action Controls -->
+      <div class="flex flex-wrap items-center gap-2.5">
+        <!-- View Mode Switcher -->
+        <div class="bg-hextech-dark p-1 rounded-lg border border-hextech-border flex items-center">
+          <button id="btn-mode-sim" onclick="switchMode('sim')" class="px-3.5 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 bg-hextech-gold text-hextech-black shadow">
+            <i class="fa-solid fa-gamepad"></i> 瑞士輪逐輪對戰
+          </button>
+          <button id="btn-mode-quick" onclick="switchMode('quick')" class="px-3.5 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 text-slate-400 hover:text-white">
+            <i class="fa-solid fa-table-cells-large"></i> Pick'em 直覺板
+          </button>
+        </div>
+
+        <!-- Utility Buttons -->
+        <button onclick="randomSimulateAll()" class="px-3 py-1.5 bg-hextech-card hover:bg-hextech-cardHover border border-hextech-border rounded-lg text-xs font-semibold text-slate-300 hover:text-hextech-gold transition flex items-center gap-1.5" title="隨機快速模擬">
+          <i class="fa-solid fa-dice text-hextech-gold"></i> 隨機快填
+        </button>
+        <button onclick="resetAll()" class="px-3 py-1.5 bg-hextech-card hover:bg-hextech-cardHover border border-hextech-border rounded-lg text-xs font-semibold text-slate-300 hover:text-hextech-danger transition flex items-center gap-1.5" title="重新重置">
+          <i class="fa-solid fa-rotate-left"></i> 重置
+        </button>
+        <button onclick="openExportModal()" class="px-3.5 py-1.5 bg-gradient-to-r from-hextech-gold to-hextech-goldDark text-hextech-black font-extrabold text-xs rounded-lg shadow-md hover:brightness-110 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-download"></i> 導出預測圖卡
+        </button>
+      </div>
+    </header>
+
+    <!-- Content Sections -->
+    <main class="flex-1 flex flex-col gap-6">
+
+      <!-- ================= MODE 1: 逐輪對抗模擬器 (Step-by-step Swiss) ================= -->
+      <section id="view-simulator" class="flex flex-col gap-4">
+        <!-- Swiss Round Tabs -->
+        <div class="flex items-center justify-between bg-hextech-dark border border-hextech-border px-3 py-2 rounded-xl overflow-x-auto">
+          <div class="flex items-center gap-2 min-w-max">
+            <button onclick="setSimRound(1)" id="tab-round-1" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 bg-hextech-gold text-hextech-black">
+              <span>第 1 輪</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-black/20 font-mono">0-0 (Bo1)</span>
+            </button>
+            <button onclick="setSimRound(2)" id="tab-round-2" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white">
+              <span>第 2 輪</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-hextech-border font-mono">1-0 / 0-1</span>
+            </button>
+            <button onclick="setSimRound(3)" id="tab-round-3" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white">
+              <span>第 3 輪</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-hextech-border font-mono">晉級/淘汰賽</span>
+            </button>
+            <button onclick="setSimRound(4)" id="tab-round-4" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white">
+              <span>第 4 輪</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-hextech-border font-mono">2-1 / 1-2</span>
+            </button>
+            <button onclick="setSimRound(5)" id="tab-round-5" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white">
+              <span>第 5 輪</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-hextech-border font-mono">2-2 生死戰</span>
+            </button>
+          </div>
+          
+          <div class="text-xs text-slate-400 pl-4 hidden md:flex items-center gap-2">
+            <i class="fa-solid fa-circle-info text-hextech-gold"></i>
+            <span>點選任一隊伍卡片即可判定該場獲勝</span>
+          </div>
+        </div>
+
+        <!-- Active Round Matches Container -->
+        <div id="round-matches-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Dynamic Matches Rendered by JS -->
+        </div>
+      </section>
+
+      <!-- ================= MODE 2: Pick'em 快捷板面 (Inspired by Client Screenshot) ================= -->
+      <section id="view-quickboard" class="hidden flex-col gap-6">
+        <div class="bg-hextech-dark border border-hextech-border p-4 rounded-xl flex flex-col md:flex-row items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-2.5 h-8 bg-hextech-gold rounded-sm"></div>
+            <div>
+              <h2 class="text-base font-bold text-white flex items-center gap-2">
+                Pick'em 直覺配置面板 
+                <span class="text-xs font-normal text-hextech-gold bg-hextech-gold/10 px-2 py-0.5 rounded border border-hextech-gold/30">官方客戶端風格</span>
+              </h2>
+              <p class="text-xs text-slate-400">點擊每個欄位的下拉選單，或由對戰模擬器自動同步填入</p>
+            </div>
+          </div>
+          <div class="text-xs text-slate-300 bg-hextech-card px-3 py-1.5 rounded-lg border border-hextech-border flex items-center gap-2">
+            <span>已配置晉級：</span>
+            <span id="quick-selected-count" class="font-bold text-hextech-gold text-sm">0</span> / 8 隊
+          </div>
+        </div>
+
+        <!-- 3-0, 3-1, 3-2 Brackets Layout matching user's screenshot -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          
+          <!-- 3-0 Column (2 teams) -->
+          <div class="bg-hextech-dark/90 border border-hextech-border rounded-xl p-4 flex flex-col gap-3 shadow-lg relative overflow-hidden">
+            <div class="flex items-center justify-between border-b border-hextech-border/70 pb-3">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-crown text-amber-400"></i>
+                <span class="font-extrabold text-base text-amber-300">3-0</span>
+              </div>
+              <span class="text-xs font-bold tracking-wider text-slate-400 px-2 py-0.5 rounded bg-black/40 border border-hextech-border">不敗 晉級 (2隊)</span>
+            </div>
+            
+            <div class="flex flex-col gap-3 mt-1">
+              <div class="slot-quick-item" data-category="3-0" data-index="0"></div>
+              <div class="slot-quick-item" data-category="3-0" data-index="1"></div>
+            </div>
+            <div class="text-[11px] text-slate-500 mt-auto pt-2 text-center">首輪連勝 3 場直接保送 8 強淘汰賽</div>
+          </div>
+
+          <!-- 3-1 Column (3 teams) -->
+          <div class="bg-hextech-dark/90 border border-hextech-border rounded-xl p-4 flex flex-col gap-3 shadow-lg relative overflow-hidden">
+            <div class="flex items-center justify-between border-b border-hextech-border/70 pb-3">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-bolt text-hextech-accentBlue"></i>
+                <span class="font-extrabold text-base text-hextech-accentBlue">3-1</span>
+              </div>
+              <span class="text-xs font-bold tracking-wider text-slate-400 px-2 py-0.5 rounded bg-black/40 border border-hextech-border">輕鬆過關 (3隊)</span>
+            </div>
+
+            <div class="flex flex-col gap-3 mt-1">
+              <div class="slot-quick-item" data-category="3-1" data-index="0"></div>
+              <div class="slot-quick-item" data-category="3-1" data-index="1"></div>
+              <div class="slot-quick-item" data-category="3-1" data-index="2"></div>
+            </div>
+            <div class="text-[11px] text-slate-500 mt-auto pt-2 text-center">僅吞一敗於第 4 輪搶下 8 強門票</div>
+          </div>
+
+          <!-- 3-2 Column (3 teams) -->
+          <div class="bg-hextech-dark/90 border border-hextech-border rounded-xl p-4 flex flex-col gap-3 shadow-lg relative overflow-hidden">
+            <div class="flex items-center justify-between border-b border-hextech-border/70 pb-3">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+                <span class="font-extrabold text-base text-emerald-400">3-2</span>
+              </div>
+              <span class="text-xs font-bold tracking-wider text-slate-400 px-2 py-0.5 rounded bg-black/40 border border-hextech-border">險勝晉級 (3隊)</span>
+            </div>
+
+            <div class="flex flex-col gap-3 mt-1">
+              <div class="slot-quick-item" data-category="3-2" data-index="0"></div>
+              <div class="slot-quick-item" data-category="3-2" data-index="1"></div>
+              <div class="slot-quick-item" data-category="3-2" data-index="2"></div>
+            </div>
+            <div class="text-[11px] text-slate-500 mt-auto pt-2 text-center">戰至第五輪 Bo3 生死大戰突圍</div>
+          </div>
+
+        </div>
+
+        <!-- 淘汰隊伍區塊 (0-3, 1-3, 2-3) -->
+        <div class="bg-hextech-dark/70 border border-hextech-border rounded-xl p-4 flex flex-col gap-3">
+          <div class="flex items-center justify-between border-b border-hextech-border/70 pb-2">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-skull text-hextech-danger"></i>
+              <span class="font-extrabold text-sm text-hextech-danger uppercase tracking-wider">瑞士輪淘汰名單 (8 隊)</span>
+            </div>
+            <span class="text-xs text-slate-400">0-3 (2隊) / 1-3 (3隊) / 2-3 (3隊)</span>
+          </div>
+          <div id="quick-eliminated-container" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2.5 pt-1">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 總覽戰報卡 (Swiss Overview Dashboard) ================= -->
+      <section class="mt-2 bg-gradient-to-b from-hextech-dark to-hextech-black border border-hextech-border/80 rounded-2xl p-5 shadow-2xl relative overflow-hidden">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-5 border-b border-hextech-border/60 pb-3">
+          <div>
+            <span class="text-[11px] font-bold text-hextech-gold tracking-widest uppercase">SWISS RESULTS PREVIEW</span>
+            <h3 class="text-lg font-black text-white flex items-center gap-2">
+              當前預測結果總結 (8 強名單 & 淘汰名單)
+            </h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="advance-badge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-hextech-card border border-hextech-border text-slate-300">
+              晉級已產生：<span id="advance-count-text" class="text-hextech-gold font-mono font-bold">0</span> / 8
+            </span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <!-- 晉級 8 強名單 -->
+          <div class="bg-hextech-card/70 border border-emerald-500/30 rounded-xl p-4 flex flex-col gap-3">
+            <div class="flex items-center justify-between text-emerald-400 text-sm font-black border-b border-hextech-border pb-2">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-circle-check"></i> 晉級八強淘汰賽 (8 隊)</span>
+              <span class="text-xs text-emerald-300/80 font-normal">Knockout Stage</span>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <!-- 3-0 -->
+              <div class="bg-hextech-dark/80 rounded-lg p-2.5 border border-hextech-border flex flex-col gap-2">
+                <span class="text-xs font-bold text-amber-400 border-b border-hextech-border/50 pb-1 flex items-center justify-between">
+                  <span>3-0 晉級</span>
+                  <span class="text-[10px] text-slate-500 font-mono">2隊</span>
+                </span>
+                <div id="summary-3-0" class="flex flex-col gap-1.5 min-h-[70px]"></div>
+              </div>
+              <!-- 3-1 -->
+              <div class="bg-hextech-dark/80 rounded-lg p-2.5 border border-hextech-border flex flex-col gap-2">
+                <span class="text-xs font-bold text-hextech-accentBlue border-b border-hextech-border/50 pb-1 flex items-center justify-between">
+                  <span>3-1 晉級</span>
+                  <span class="text-[10px] text-slate-500 font-mono">3隊</span>
+                </span>
+                <div id="summary-3-1" class="flex flex-col gap-1.5 min-h-[70px]"></div>
+              </div>
+              <!-- 3-2 -->
+              <div class="bg-hextech-dark/80 rounded-lg p-2.5 border border-hextech-border flex flex-col gap-2">
+                <span class="text-xs font-bold text-emerald-400 border-b border-hextech-border/50 pb-1 flex items-center justify-between">
+                  <span>3-2 晉級</span>
+                  <span class="text-[10px] text-slate-500 font-mono">3隊</span>
+                </span>
+                <div id="summary-3-2" class="flex flex-col gap-1.5 min-h-[70px]"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 淘汰隊伍名單 -->
+          <div class="bg-hextech-card/70 border border-hextech-danger/30 rounded-xl p-4 flex flex-col gap-3">
+            <div class="flex items-center justify-between text-hextech-danger text-sm font-black border-b border-hextech-border pb-2">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-circle-xmark"></i> 瑞士輪遺憾淘汰 (8 隊)</span>
+              <span class="text-xs text-rose-300/80 font-normal">Eliminated</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <!-- 2-3 -->
+              <div class="bg-hextech-dark/80 rounded-lg p-2.5 border border-hextech-border flex flex-col gap-2">
+                <span class="text-xs font-bold text-amber-200/90 border-b border-hextech-border/50 pb-1 flex items-center justify-between">
+                  <span>2-3 惜敗</span>
+                  <span class="text-[10px] text-slate-500 font-mono">3隊</span>
+                </span>
+                <div id="summary-2-3" class="flex flex-col gap-1.5 min-h-[70px]"></div>
+              </div>
+              <!-- 1-3 -->
+              <div class="bg-hextech-dark/80 rounded-lg p-2.5 border border-hextech-border flex flex-col gap-2">
+                <span class="text-xs font-bold text-rose-300 border-b border-hextech-border/50 pb-1 flex items-center justify-between">
+                  <span>1-3 淘汰</span>
+                  <span class="text-[10px] text-slate-500 font-mono">3隊</span>
+                </span>
+                <div id="summary-1-3" class="flex flex-col gap-1.5 min-h-[70px]"></div>
+              </div>
+              <!-- 0-3 -->
+              <div class="bg-hextech-dark/80 rounded-lg p-2.5 border border-hextech-border flex flex-col gap-2">
+                <span class="text-xs font-bold text-red-500 border-b border-hextech-border/50 pb-1 flex items-center justify-between">
+                  <span>0-3 淘汰</span>
+                  <span class="text-[10px] text-slate-500 font-mono">2隊</span>
+                </span>
+                <div id="summary-0-3" class="flex flex-col gap-1.5 min-h-[70px]"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-8 border-t border-hextech-border/60 pt-4 pb-2 text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p>2026 League of Legends World Championship Swiss Stage Simulator</p>
+      <p class="text-slate-400">專為 LOL 玩家設計的電競預測與對戰模擬工具</p>
+    </footer>
+  </div>
+
+  <!-- ================= EXPORT CARD MODAL ================= -->
+  <div id="export-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
+    <div class="bg-hextech-dark border border-hextech-gold/40 rounded-2xl max-w-2xl w-full p-5 shadow-2xl flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-hextech-border pb-3">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-image text-hextech-gold"></i> 我的 2026 世界賽預測圖卡
+        </h3>
+        <button onclick="closeExportModal()" class="w-8 h-8 rounded-lg bg-hextech-card text-slate-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Preview Image Card to be captured -->
+      <div id="share-card" class="bg-gradient-to-br from-[#0c1017] via-[#121926] to-[#0a0d13] border-2 border-hextech-gold p-6 rounded-2xl shadow-2xl text-slate-200">
+        <!-- Card Header -->
+        <div class="flex items-center justify-between border-b border-hextech-gold/40 pb-4 mb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-hextech-gold flex items-center justify-center text-hextech-black font-black text-lg">
+              <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div>
+              <div class="text-[10px] tracking-widest uppercase font-extrabold text-hextech-gold">2026 WORLDS PICK'EM</div>
+              <div class="text-lg font-black text-white">我的瑞士輪 8 強預測清單</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-xs px-2.5 py-1 rounded bg-hextech-gold/20 text-hextech-gold font-bold border border-hextech-gold/30">瑞士輪合格預測</span>
+          </div>
+        </div>
+
+        <!-- 8 Qualified Teams -->
+        <div class="mb-4">
+          <div class="text-xs font-black text-hextech-accentBlue uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <i class="fa-solid fa-trophy"></i> 晉級八強隊伍 (Advancing Teams)
+          </div>
+          <div class="grid grid-cols-3 gap-2" id="export-advancing-grid">
+            <!-- Filled by JS -->
+          </div>
+        </div>
+
+        <!-- Eliminated Teams -->
+        <div class="pt-2 border-t border-hextech-border/50">
+          <div class="text-xs font-black text-hextech-danger uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <i class="fa-solid fa-skull"></i> 瑞士輪遺憾淘汰 (Eliminated Teams)
+          </div>
+          <div class="grid grid-cols-4 gap-1.5 text-xs" id="export-eliminated-grid">
+            <!-- Filled by JS -->
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-hextech-border/30 flex items-center justify-between text-[10px] text-slate-400">
+          <span>League of Legends World Championship 2026</span>
+          <span class="text-hextech-gold">Generated by Swiss Simulator</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button onclick="closeExportModal()" class="px-4 py-2 rounded-lg bg-hextech-card text-xs font-bold text-slate-300 hover:text-white">
+          關閉
+        </button>
+        <button id="btn-download-img" onclick="downloadCardImage()" class="px-5 py-2 rounded-lg bg-hextech-gold hover:bg-hextech-goldBright text-hextech-black font-extrabold text-xs shadow-md transition flex items-center gap-2">
+          <i class="fa-solid fa-download"></i> 下載高清預測 PNG
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none bg-hextech-dark border border-hextech-gold px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+    <i id="toast-icon" class="fa-solid fa-circle-check text-hextech-gold text-lg"></i>
+    <span id="toast-msg" class="text-xs font-bold text-white">通知訊息</span>
+  </div>
+
+  <!-- ================= LOGIC SCRIPT ================= -->
+  <script>
+    /* 16 Participating Teams for 2026 Worlds (Official Swiss Stage Roster) */
+    const TEAMS = [
+      { id: 'GEN', name: 'Gen.G', region: 'LCK', color: '#aa8a00', logo: 'GEN' },
+      { id: 'IG', name: 'Invictus Gaming', region: 'LPL', color: '#ffffff', logo: 'iG' },
+      { id: 'TL', name: 'Team Liquid', region: 'LCS', color: '#142953', logo: 'TL' },
+      { id: 'CFO', name: 'CTBC Flying Oyster', region: 'LCP', color: '#0084ff', logo: 'CFO' },
+      { id: 'AL', name: "Anyone's Legend", region: 'LPL', color: '#df2a2a', logo: 'AL' },
+      { id: 'KC', name: 'Karmine Corp', region: 'LEC', color: '#1389eb', logo: 'KC' },
+      { id: 'G2', name: 'G2 Esports', region: 'LEC', color: '#ffffff', logo: 'G2' },
+      { id: 'DK', name: 'Dplus KIA', region: 'LCK', color: '#00a3e0', logo: 'DK' },
+      { id: 'HLE', name: 'Hanwha Life Esports', region: 'LCK', color: '#ff6600', logo: 'HLE' },
+      { id: 'TES', name: 'TOP ESPORTS', region: 'LPL', color: '#ff3333', logo: 'TES' },
+      { id: 'LOS', name: 'LØS', region: 'CBLOL', color: '#ff6200', logo: 'LOS' },
+      { id: 'T1', name: 'T1', region: 'LCK', color: '#e21b3c', logo: 'T1' },
+      { id: 'TSW', name: 'Team Secret Whales', region: 'LCP', color: '#00c389', logo: 'TSW' },
+      { id: 'LYON', name: 'LYON', region: 'LCS', color: '#d4af37', logo: 'LYON' },
+      { id: 'BLG', name: 'BILIBILI GAMING', region: 'LPL', color: '#00a4ff', logo: 'BLG' },
+      { id: 'MKOI', name: 'Movistar KOI', region: 'LEC', color: '#c026d3', logo: 'MKOI' }
+    ];
+
+    const teamMap = {};
+    TEAMS.forEach(t => teamMap[t.id] = t);
+
+    /* State Management */
+    let currentMode = 'sim'; // 'sim' | 'quick'
+    let currentSimRound = 1;
+
+    // Swiss rounds structure
+    let swissState = {
+      round1: [],
+      round2: [],
+      round3: [],
+      round4: [],
+      round5: []
+    };
+
+    // Quick Pick'em slots
+    let quickSlots = {
+      '3-0': [null, null],
+      '3-1': [null, null, null],
+      '3-2': [null, null, null]
+    };
+
+    /* Official Locked Round 1 Draw Matchups */
+    function initRound1() {
+      const officialDraw = [
+        ['GEN', 'IG'],
+        ['TL', 'CFO'],
+        ['AL', 'KC'],
+        ['G2', 'DK'],
+        ['HLE', 'TES'],
+        ['LOS', 'T1'],
+        ['TSW', 'LYON'],
+        ['BLG', 'MKOI']
+      ];
+
+      swissState.round1 = officialDraw.map((pair, idx) => ({
+        id: `r1_m${idx + 1}`,
+        team1: pair[0],
+        team2: pair[1],
+        winner: null,
+        format: 'Bo1',
+        bracket: '0-0 第 1 輪'
+      }));
+    }
+
+    /* Helper: get team stats up to current state */
+    function calculateTeamRecords() {
+      const records = {};
+      TEAMS.forEach(t => {
+        records[t.id] = { wins: 0, losses: 0, status: 'active', playedAgainst: [] };
+      });
+
+      for (let r = 1; r <= 5; r++) {
+        const roundMatches = swissState[`round${r}`] || [];
+        roundMatches.forEach(m => {
+          if (!m.team1 || !m.team2) return;
+          records[m.team1].playedAgainst.push(m.team2);
+          records[m.team2].playedAgainst.push(m.team1);
+
+          if (!m.winner) return;
+          const loser = (m.winner === m.team1) ? m.team2 : m.team1;
+          records[m.winner].wins += 1;
+          records[loser].losses += 1;
+
+          if (records[m.winner].wins === 3) records[m.winner].status = 'qualified';
+          if (records[loser].losses === 3) records[loser].status = 'eliminated';
+        });
+      }
+      return records;
+    }
+
+    /* Set Active Round Tab */
+    function setSimRound(roundNum) {
+      currentSimRound = roundNum;
+      for (let i = 1; i <= 5; i++) {
+        const tab = document.getElementById(`tab-round-${i}`);
+        if (!tab) continue;
+        if (i === roundNum) {
+          tab.className = "px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 bg-hextech-gold text-hextech-black shadow-md";
+        } else {
+          tab.className = "px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white";
+        }
+      }
+      renderSimulatorMatches();
+    }
+
+    /* Switch View Modes */
+    function switchMode(mode) {
+      currentMode = mode;
+      const simView = document.getElementById('view-simulator');
+      const quickView = document.getElementById('view-quickboard');
+      const btnSim = document.getElementById('btn-mode-sim');
+      const btnQuick = document.getElementById('btn-mode-quick');
+
+      if (mode === 'sim') {
+        simView.classList.remove('hidden');
+        quickView.classList.add('hidden');
+        btnSim.className = "px-3.5 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 bg-hextech-gold text-hextech-black shadow";
+        btnQuick.className = "px-3.5 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 text-slate-400 hover:text-white";
+        renderSimulatorMatches();
+      } else {
+        simView.classList.add('hidden');
+        quickView.classList.remove('hidden');
+        btnQuick.className = "px-3.5 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 bg-hextech-gold text-hextech-black shadow";
+        btnSim.className = "px-3.5 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 text-slate-400 hover:text-white";
+        syncStateToQuickSlots();
+        renderQuickBoard();
+      }
+      updateSummaryDashboard();
+    }
+
+    /* Pick a winner in Simulator mode */
+    function pickWinner(roundNum, matchIdx, winningTeamId) {
+      const match = swissState[`round${roundNum}`][matchIdx];
+      if (!match || !match.team1 || !match.team2) return;
+
+      match.winner = (match.winner === winningTeamId) ? null : winningTeamId;
+
+      // Invalidate subsequent rounds
+      for (let r = roundNum + 1; r <= 5; r++) {
+        swissState[`round${r}`] = [];
+      }
+
+      generateNextRoundsIfPossible(roundNum);
+      renderSimulatorMatches();
+      updateSummaryDashboard();
+      syncStateToQuickSlots();
+    }
+
+    /* Swiss Pairing Generator avoiding re-matching */
+    function createSwissPairs(teamPool, bracketLabel, format, idPrefix, history) {
+      const pool = [...teamPool];
+      const pairs = [];
+      let matchCount = 0;
+
+      while (pool.length >= 2) {
+        const teamA = pool.shift();
+        // Try finding opponent team hasn't played against
+        let oppIdx = pool.findIndex(t => !history[teamA]?.playedAgainst.includes(t));
+        if (oppIdx === -1) oppIdx = 0; // fallback if unavoidable
+
+        const teamB = pool.splice(oppIdx, 1)[0];
+        matchCount++;
+        pairs.push({
+          id: `${idPrefix}_${matchCount}`,
+          team1: teamA,
+          team2: teamB,
+          winner: null,
+          format: format,
+          bracket: bracketLabel
+        });
+      }
+      return pairs;
+    }
+
+    /* Progressively Generate Next Swiss Rounds */
+    function generateNextRoundsIfPossible(roundNum) {
+      const history = calculateTeamRecords();
+
+      // Round 2
+      if (roundNum === 1 && swissState.round1.every(m => m.winner)) {
+        const pool1_0 = swissState.round1.map(m => m.winner);
+        const pool0_1 = swissState.round1.map(m => (m.winner === m.team1 ? m.team2 : m.team1));
+
+        swissState.round2 = [
+          ...createSwissPairs(pool1_0, '1-0 組', 'Bo1', 'r2_high', history),
+          ...createSwissPairs(pool0_1, '0-1 組', 'Bo1', 'r2_low', history)
+        ];
+      }
+
+      // Round 3
+      if (roundNum === 2 && swissState.round2.length === 8 && swissState.round2.every(m => m.winner)) {
+        const pool2_0 = Object.keys(history).filter(id => history[id].wins === 2 && history[id].losses === 0);
+        const pool1_1 = Object.keys(history).filter(id => history[id].wins === 1 && history[id].losses === 1);
+        const pool0_2 = Object.keys(history).filter(id => history[id].wins === 0 && history[id].losses === 2);
+
+        swissState.round3 = [
+          ...createSwissPairs(pool2_0, '2-0 (3-0 晉級賽)', 'Bo3', 'r3_qual', history),
+          ...createSwissPairs(pool1_1, '1-1 組', 'Bo1', 'r3_mid', history),
+          ...createSwissPairs(pool0_2, '0-2 (0-3 淘汰賽)', 'Bo3', 'r3_elim', history)
+        ];
+      }
+
+      // Round 4
+      if (roundNum === 3 && swissState.round3.length > 0 && swissState.round3.every(m => m.winner)) {
+        const pool2_1 = Object.keys(history).filter(id => history[id].wins === 2 && history[id].losses === 1);
+        const pool1_2 = Object.keys(history).filter(id => history[id].wins === 1 && history[id].losses === 2);
+
+        swissState.round4 = [
+          ...createSwissPairs(pool2_1, '2-1 (3-1 晉級賽)', 'Bo3', 'r4_qual', history),
+          ...createSwissPairs(pool1_2, '1-2 (1-3 淘汰賽)', 'Bo3', 'r4_elim', history)
+        ];
+      }
+
+      // Round 5
+      if (roundNum === 4 && swissState.round4.length > 0 && swissState.round4.every(m => m.winner)) {
+        const pool2_2 = Object.keys(history).filter(id => history[id].wins === 2 && history[id].losses === 2);
+        swissState.round5 = createSwissPairs(pool2_2, '2-2 (3-2 生死資格戰)', 'Bo3', 'r5_decider', history);
+      }
+    }
+
+    /* Render Simulator Matches */
+    function renderSimulatorMatches() {
+      const container = document.getElementById('round-matches-container');
+      const matches = swissState[`round${currentSimRound}`] || [];
+
+      if (matches.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full py-12 flex flex-col items-center justify-center text-center bg-hextech-dark/60 border border-dashed border-hextech-border rounded-2xl p-6">
+            <div class="w-12 h-12 rounded-full bg-hextech-card flex items-center justify-center text-slate-500 text-xl mb-3">
+              <i class="fa-solid fa-lock"></i>
+            </div>
+            <h4 class="text-base font-bold text-slate-300">尚未解鎖第 ${currentSimRound} 輪對戰組合</h4>
+            <p class="text-xs text-slate-500 max-w-sm mt-1">請先於第 ${currentSimRound - 1} 輪完成所有勝負點選，系統會依據瑞士輪規則自動抽籤配對。</p>
+            <button onclick="setSimRound(${currentSimRound - 1})" class="mt-4 px-4 py-1.5 rounded-lg bg-hextech-card hover:bg-hextech-cardHover text-hextech-gold border border-hextech-border text-xs font-bold">
+              返回上一輪次
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = matches.map((m, idx) => {
+        const t1 = teamMap[m.team1];
+        const t2 = teamMap[m.team2];
+        const t1Won = m.winner === m.team1;
+        const t2Won = m.winner === m.team2;
+        const isBo3 = m.format === 'Bo3';
+        const isCritical = m.bracket.includes('晉級') || m.bracket.includes('淘汰') || m.bracket.includes('生死');
+
+        return `
+          <div class="bg-hextech-dark border ${m.winner ? 'border-hextech-gold/70 shadow-lg' : 'border-hextech-border'} rounded-xl p-3 flex flex-col gap-2.5 transition-all">
+            <div class="flex items-center justify-between text-[11px] font-bold text-slate-400 border-b border-hextech-border/50 pb-2">
+              <span class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full ${isCritical ? 'bg-amber-400 animate-pulse' : 'bg-hextech-gold'}"></span>
+                <span class="${isCritical ? 'text-amber-300 font-extrabold' : 'text-slate-300'}">${m.bracket}</span>
+              </span>
+              <span class="px-2 py-0.5 rounded text-[10px] ${isBo3 ? 'bg-indigo-950 text-indigo-300 border border-indigo-700/50' : 'bg-black/50 text-slate-400'} font-mono">
+                ${m.format}
+              </span>
+            </div>
+
+            <!-- Client-style Matchup Card Box -->
+            <div class="bg-hextech-card/80 border border-hextech-border/70 rounded-lg p-1.5 flex flex-col gap-1.5">
+              <!-- Team 1 -->
+              <button onclick="pickWinner(${currentSimRound}, ${idx}, '${m.team1}')" class="w-full text-left p-2.5 rounded-md border transition flex items-center justify-between ${t1Won ? 'bg-gradient-to-r from-hextech-cardHover to-hextech-dark border-hextech-accentBlue text-white font-bold hex-glow-win' : 'bg-black/30 hover:bg-hextech-cardHover/70 border-transparent text-slate-300'}">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <span class="w-7 h-7 rounded bg-black/80 flex items-center justify-center font-black text-xs border border-white/10 shrink-0" style="color: ${t1.color}">
+                    ${t1.logo}
+                  </span>
+                  <div class="truncate">
+                    <div class="text-xs font-semibold leading-tight truncate">${t1.name}</div>
+                    <div class="text-[10px] text-slate-500">${t1.region}</div>
+                  </div>
+                </div>
+                ${t1Won ? '<span class="text-xs px-2 py-0.5 rounded bg-hextech-accentBlue/20 text-hextech-accentBlue border border-hextech-accentBlue/40 shrink-0 font-bold">獲勝</span>' : '<span class="text-[10px] text-slate-600 shrink-0 hover:text-slate-400">點選</span>'}
+              </button>
+
+              <div class="flex items-center justify-center relative my-[-2px]">
+                <span class="bg-hextech-dark px-2 text-[9px] font-mono text-slate-500 uppercase tracking-widest font-black rounded border border-hextech-border/60">VS</span>
+              </div>
+
+              <!-- Team 2 -->
+              <button onclick="pickWinner(${currentSimRound}, ${idx}, '${m.team2}')" class="w-full text-left p-2.5 rounded-md border transition flex items-center justify-between ${t2Won ? 'bg-gradient-to-r from-hextech-cardHover to-hextech-dark border-hextech-accentBlue text-white font-bold hex-glow-win' : 'bg-black/30 hover:bg-hextech-cardHover/70 border-transparent text-slate-300'}">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <span class="w-7 h-7 rounded bg-black/80 flex items-center justify-center font-black text-xs border border-white/10 shrink-0" style="color: ${t2.color}">
+                    ${t2.logo}
+                  </span>
+                  <div class="truncate">
+                    <div class="text-xs font-semibold leading-tight truncate">${t2.name}</div>
+                    <div class="text-[10px] text-slate-500">${t2.region}</div>
+                  </div>
+                </div>
+                ${t2Won ? '<span class="text-xs px-2 py-0.5 rounded bg-hextech-accentBlue/20 text-hextech-accentBlue border border-hextech-accentBlue/40 shrink-0 font-bold">獲勝</span>' : '<span class="text-[10px] text-slate-600 shrink-0 hover:text-slate-400">點選</span>'}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* Render Quick Pick'em Board (Screenshot UI layout) */
+    function renderQuickBoard() {
+      // Render 3-0, 3-1, 3-2 slots
+      ['3-0', '3-1', '3-2'].forEach(cat => {
+        const slots = quickSlots[cat];
+        slots.forEach((val, idx) => {
+          const el = document.querySelector(`.slot-quick-item[data-category="${cat}"][data-index="${idx}"]`);
+          if (!el) return;
+
+          const team = val ? teamMap[val] : null;
+          el.innerHTML = `
+            <div class="relative w-full">
+              <select onchange="onQuickSelectChange('${cat}', ${idx}, this.value)" class="w-full appearance-none bg-hextech-card hover:bg-hextech-cardHover text-slate-200 border ${team ? 'border-hextech-gold/70 text-white' : 'border-hextech-border text-slate-400'} rounded-xl py-3 px-3.5 text-xs font-semibold focus:outline-none focus:border-hextech-gold cursor-pointer transition flex items-center justify-between pr-8">
+                <option value="" ${!team ? 'selected' : ''}>選擇隊伍......</option>
+                ${TEAMS.map(t => {
+                  const isSelected = val === t.id;
+                  const isUsedElsewhere = isTeamUsedInQuickSlots(t.id) && !isSelected;
+                  return `<option value="${t.id}" ${isSelected ? 'selected' : ''} ${isUsedElsewhere ? 'disabled class="text-slate-600 bg-hextech-dark"' : 'class="bg-hextech-dark text-slate-200"'}>
+                    ${t.name} (${t.region}) ${isUsedElsewhere ? ' [已在其他區塊]' : ''}
+                  </option>`;
+                }).join('')}
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                <i class="fa-solid fa-chevron-down text-xs"></i>
+              </div>
+            </div>
+          `;
+        });
+      });
+
+      // Update selected count
+      const count = Object.values(quickSlots).flat().filter(Boolean).length;
+      document.getElementById('quick-selected-count').innerText = count;
+
+      // Render Eliminated List in Quick Board
+      const container = document.getElementById('quick-eliminated-container');
+      const selectedAdvancing = new Set(Object.values(quickSlots).flat().filter(Boolean));
+      const eliminatedTeams = TEAMS.filter(t => !selectedAdvancing.has(t.id));
+
+      container.innerHTML = eliminatedTeams.map(t => `
+        <div class="bg-hextech-card border border-hextech-border/70 rounded-lg p-2 flex items-center gap-2 text-xs">
+          <span class="w-6 h-6 rounded bg-black/60 flex items-center justify-center font-bold text-[10px]" style="color:${t.color}">
+            ${t.logo}
+          </span>
+          <div class="overflow-hidden truncate">
+            <div class="truncate text-slate-300 font-medium">${t.name}</div>
+            <div class="text-[9px] text-slate-500">${t.region}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function isTeamUsedInQuickSlots(teamId) {
+      for (let cat of ['3-0', '3-1', '3-2']) {
+        if (quickSlots[cat].includes(teamId)) return true;
+      }
+      return false;
+    }
+
+    function onQuickSelectChange(category, index, newTeamId) {
+      quickSlots[category][index] = newTeamId || null;
+      renderQuickBoard();
+      updateSummaryDashboard();
+      showToast('已更新 Pick\'em 預測選擇');
+    }
+
+    /* Synchronize Swiss Simulator State into Quick Slots */
+    function syncStateToQuickSlots() {
+      const records = calculateTeamRecords();
+
+      const teams3_0 = Object.keys(records).filter(id => records[id].wins === 3 && records[id].losses === 0);
+      const teams3_1 = Object.keys(records).filter(id => records[id].wins === 3 && records[id].losses === 1);
+      const teams3_2 = Object.keys(records).filter(id => records[id].wins === 3 && records[id].losses === 2);
+
+      quickSlots['3-0'] = [teams3_0[0] || null, teams3_0[1] || null];
+      quickSlots['3-1'] = [teams3_1[0] || null, teams3_1[1] || null, teams3_1[2] || null];
+      quickSlots['3-2'] = [teams3_2[0] || null, teams3_2[1] || null, teams3_2[2] || null];
+    }
+
+    /* Update Bottom Summary & Cards */
+    function updateSummaryDashboard() {
+      let t3_0 = [], t3_1 = [], t3_2 = [];
+      let t2_3 = [], t1_3 = [], t0_3 = [];
+
+      if (currentMode === 'quick') {
+        t3_0 = quickSlots['3-0'].filter(Boolean);
+        t3_1 = quickSlots['3-1'].filter(Boolean);
+        t3_2 = quickSlots['3-2'].filter(Boolean);
+        const advancing = new Set([...t3_0, ...t3_1, ...t3_2]);
+        const remain = TEAMS.filter(t => !advancing.has(t.id)).map(t => t.id);
+        t0_3 = remain.slice(0, 2);
+        t1_3 = remain.slice(2, 5);
+        t2_3 = remain.slice(5, 8);
+      } else {
+        const records = calculateTeamRecords();
+        t3_0 = Object.keys(records).filter(id => records[id].wins === 3 && records[id].losses === 0);
+        t3_1 = Object.keys(records).filter(id => records[id].wins === 3 && records[id].losses === 1);
+        t3_2 = Object.keys(records).filter(id => records[id].wins === 3 && records[id].losses === 2);
+
+        t0_3 = Object.keys(records).filter(id => records[id].wins === 0 && records[id].losses === 3);
+        t1_3 = Object.keys(records).filter(id => records[id].wins === 1 && records[id].losses === 3);
+        t2_3 = Object.keys(records).filter(id => records[id].wins === 2 && records[id].losses === 3);
+      }
+
+      const totalAdvancing = t3_0.length + t3_1.length + t3_2.length;
+      document.getElementById('advance-count-text').innerText = totalAdvancing;
+
+      renderTeamBadgeList('summary-3-0', t3_0, 'text-amber-400');
+      renderTeamBadgeList('summary-3-1', t3_1, 'text-hextech-accentBlue');
+      renderTeamBadgeList('summary-3-2', t3_2, 'text-emerald-400');
+
+      renderTeamBadgeList('summary-2-3', t2_3, 'text-amber-200');
+      renderTeamBadgeList('summary-1-3', t1_3, 'text-rose-300');
+      renderTeamBadgeList('summary-0-3', t0_3, 'text-red-500');
+    }
+
+    function renderTeamBadgeList(elementId, teamIdList, accentColorClass) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+
+      if (teamIdList.length === 0) {
+        el.innerHTML = `<span class="text-[11px] text-slate-600 italic py-2 text-center">暫無產生</span>`;
+        return;
+      }
+
+      el.innerHTML = teamIdList.map(id => {
+        const t = teamMap[id];
+        return `
+          <div class="flex items-center justify-between bg-black/40 px-2 py-1.5 rounded border border-hextech-border/50 text-xs">
+            <span class="font-bold text-white flex items-center gap-1.5">
+              <span class="w-4 h-4 rounded text-[9px] flex items-center justify-center bg-black" style="color: ${t.color}">
+                ${t.logo}
+              </span>
+              ${t.name}
+            </span>
+            <span class="text-[10px] text-slate-400 font-mono">${t.region}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* Random Simulate All Rounds to Completion */
+    function randomSimulateAll() {
+      resetAll();
+      for (let r = 1; r <= 5; r++) {
+        const matches = swissState[`round${r}`];
+        if (!matches || matches.length === 0) break;
+        matches.forEach(m => {
+          // Weighted random (slight favor to LCK/LPL top seeds)
+          const favor1 = ['T1', 'GEN', 'BLG', 'HLE', 'TES'].includes(m.team1) ? 1.5 : 1;
+          const favor2 = ['T1', 'GEN', 'BLG', 'HLE', 'TES'].includes(m.team2) ? 1.5 : 1;
+          const pick1 = Math.random() * favor1 >= Math.random() * favor2;
+          m.winner = pick1 ? m.team1 : m.team2;
+        });
+        generateNextRoundsIfPossible(r);
+      }
+
+      syncStateToQuickSlots();
+      renderSimulatorMatches();
+      if (currentMode === 'quick') renderQuickBoard();
+      updateSummaryDashboard();
+      showToast('已完成全賽程隨機模擬預測！');
+    }
+
+    /* Reset All States */
+    function resetAll() {
+      initRound1();
+      swissState.round2 = [];
+      swissState.round3 = [];
+      swissState.round4 = [];
+      swissState.round5 = [];
+      quickSlots = {
+        '3-0': [null, null],
+        '3-1': [null, null, null],
+        '3-2': [null, null, null]
+      };
+      currentSimRound = 1;
+      setSimRound(1);
+      if (currentMode === 'quick') renderQuickBoard();
+      updateSummaryDashboard();
+      showToast('預測資料已重置');
+    }
+
+    /* Export Modal & Image Download */
+    function openExportModal() {
+      const modal = document.getElementById('export-modal');
+      const advGrid = document.getElementById('export-advancing-grid');
+      const elimGrid = document.getElementById('export-eliminated-grid');
+
+      // Populate cards for modal
+      syncStateToQuickSlots();
+      const records = calculateTeamRecords();
+
+      const t3_0 = quickSlots['3-0'].filter(Boolean);
+      const t3_1 = quickSlots['3-1'].filter(Boolean);
+      const t3_2 = quickSlots['3-2'].filter(Boolean);
+
+      const allAdv = [
+        ...t3_0.map(id => ({ id, tag: '3-0 不敗', color: 'text-amber-400' })),
+        ...t3_1.map(id => ({ id, tag: '3-1 輕鬆', color: 'text-hextech-accentBlue' })),
+        ...t3_2.map(id => ({ id, tag: '3-2 險勝', color: 'text-emerald-400' }))
+      ];
+
+      const advSet = new Set(allAdv.map(x => x.id));
+      const elim = TEAMS.filter(t => !advSet.has(t.id));
+
+      advGrid.innerHTML = allAdv.length ? allAdv.map(item => {
+        const t = teamMap[item.id];
+        return `
+          <div class="bg-black/50 border border-hextech-gold/40 rounded-xl p-2.5 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded bg-black flex items-center justify-center font-bold text-xs" style="color:${t.color}">${t.logo}</span>
+              <div class="flex flex-col">
+                <span class="text-xs font-bold text-white">${t.name}</span>
+                <span class="text-[9px] text-slate-400">${t.region}</span>
+              </div>
+            </div>
+            <span class="text-[10px] font-black ${item.color}">${item.tag}</span>
+          </div>
+        `;
+      }).join('') : `<div class="col-span-3 text-center text-xs text-slate-500 py-4">請先於對戰模擬器中完成對戰預測</div>`;
+
+      elimGrid.innerHTML = elim.map(t => `
+        <div class="bg-black/30 border border-hextech-border/40 rounded-lg p-1.5 flex items-center gap-1.5 text-[11px]">
+          <span class="w-4 h-4 rounded text-[9px] flex items-center justify-center bg-black" style="color:${t.color}">${t.logo}</span>
+          <span class="text-slate-300 font-medium truncate">${t.name}</span>
+        </div>
+      `).join('');
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeExportModal() {
+      document.getElementById('export-modal').classList.add('hidden');
+    }
+
+    function downloadCardImage() {
+      const target = document.getElementById('share-card');
+      const btn = document.getElementById('btn-download-img');
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> 繪製圖片中...`;
+      btn.disabled = true;
+
+      html2canvas(target, {
+        backgroundColor: '#0c1017',
+        scale: 2
+      }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `2026_LOL_Worlds_Swiss_Pickem.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        btn.innerHTML = `<i class="fa-solid fa-download"></i> 下載高清預測 PNG`;
+        btn.disabled = false;
+        showToast('圖片下載完成！');
+      }).catch(err => {
+        console.error(err);
+        btn.innerHTML = `<i class="fa-solid fa-download"></i> 下載高清預測 PNG`;
+        btn.disabled = false;
+        showToast('圖片生成失敗，請重試');
+      });
+    }
+
+    /* Toast Helper */
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const msg = document.getElementById('toast-msg');
+      msg.innerText = message;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 2500);
+    }
+
+    // Startup
+    window.onload = function() {
+      initRound1();
+      renderSimulatorMatches();
+      renderQuickBoard();
+      updateSummaryDashboard();
+    };
+  </script>
+</body>
+</html>
